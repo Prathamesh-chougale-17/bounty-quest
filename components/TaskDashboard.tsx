@@ -7,7 +7,7 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
-import { Award, Loader2, Trophy, Clock } from "lucide-react";
+import { Award, Trophy, Clock } from "lucide-react";
 import { Task } from "@/types/challenge";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
