@@ -23,7 +23,12 @@ export default function LoginPage() {
           <Button
             className="w-full"
             variant="outline"
-            onClick={() => signIn("twitter")}
+            onClick={() =>
+              signIn("twitter", {
+                redirect: true,
+                callbackUrl: "/tasks",
+              })
+            }
           >
             <Twitter className="mr-2 h-4 w-4" />
             Sign in with Twitter
