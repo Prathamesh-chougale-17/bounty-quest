@@ -153,16 +153,22 @@ const TaskContent = () => {
             <Table>
                 <TableHeader>
                     <TableRow>
-                        <TableHead className="w-[80px]  text-center">Sr. No</TableHead>
-                        <TableHead className="w-[300px] cursor-pointer" onClick={() => handleSort('title')}>
-                            Title <SortIcon column="title" />
+                        <TableHead className="w-[80px] text-center">Sr. No</TableHead>
+                        <TableHead className="w-[300px]">
+                            <div className="flex items-center cursor-pointer" onClick={() => handleSort('title')}>
+                                Title <SortIcon column="title" />
+                            </div>
                         </TableHead>
                         <TableHead className="w-[150px] text-center">Category</TableHead>
-                        <TableHead className="w-[150px] cursor-pointer text-center" onClick={() => handleSort('rewards.usdcAmount')}>
-                            Rewards <SortIcon column="rewards.usdcAmount" />
+                        <TableHead className="w-[150px] text-center">
+                            <div className="flex items-center justify-center cursor-pointer" onClick={() => handleSort('rewards.usdcAmount')}>
+                                Rewards <SortIcon column="rewards.usdcAmount" />
+                            </div>
                         </TableHead>
-                        <TableHead className="w-[150px] cursor-pointer text-center" onClick={() => handleSort('endTime')}>
-                            Ended On <SortIcon column="endTime" />
+                        <TableHead className="w-[150px] text-center">
+                            <div className="flex items-center justify-center cursor-pointer" onClick={() => handleSort('endTime')}>
+                                Ended On <SortIcon column="endTime" />
+                            </div>
                         </TableHead>
                         <TableHead className="w-[120px] text-center">Actions</TableHead>
                     </TableRow>
