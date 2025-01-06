@@ -7,6 +7,7 @@ import { useState } from "react";
 import ModeToggle from "./darkmode";
 import Image from "next/image";
 import { WalletButton } from "../WalletButton";
+import { signOut } from "next-auth/react";
 
 const routes = [
   { href: "/", label: "Home" },
@@ -25,7 +26,12 @@ export function Navbar() {
           {/* Desktop Logo */}
           <div className="hidden md:block">
             <Link href="/" className="font-bold text-xl">
-              <Image src={"/solana-logo.png"} width={40} height={40} alt="Logo" />
+              <Image
+                src={"/solana-logo.png"}
+                width={40}
+                height={40}
+                alt="Logo"
+              />
             </Link>
           </div>
           {/* Mobile Menu Button */}
@@ -70,6 +76,9 @@ export function Navbar() {
           ))}
           <WalletButton />
           <ModeToggle />
+          <Button variant="default" onClick={() => signOut()}>
+            Sign Out
+          </Button>
         </div>
 
         {/* Mobile Actions */}
