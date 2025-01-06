@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import {
     Table,
@@ -39,9 +39,9 @@ interface SortConfig {
     direction: 'asc' | 'desc';
 }
 
-const PastTask = () => {
-    const router = useRouter();
+const TaskContent = () => {
     const searchParams = useSearchParams();
+    const router = useRouter();
     const [tasks, setTasks] = useState<Task[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [selectedTask, setSelectedTask] = useState<Task | null>(null);
@@ -69,30 +69,29 @@ const PastTask = () => {
         router.push(`?${params.toString()}`);
     };
 
-    const fetchTasks = async () => {
-        setIsLoading(true);
-        try {
-            const params = new URLSearchParams({
-                page: currentPage.toString(),
-                ...(selectedCategory !== 'all' && { category: selectedCategory }),
-                sortBy: sortConfig.column,
-                sortOrder: sortConfig.direction
-            });
-
-            const response = await fetch(`/api/tasks/past?${params}`);
-            if (response.ok) {
-                const data = await response.json();
-                setTasks(data.tasks);
-                setTotalPages(data.pagination.totalPages);
-            }
-        } catch (error) {
-            console.error("Error fetching tasks:", error);
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
     useEffect(() => {
+        const fetchTasks = async () => {
+            setIsLoading(true);
+            try {
+                const params = new URLSearchParams({
+                    page: currentPage.toString(),
+                    ...(selectedCategory !== 'all' && { category: selectedCategory }),
+                    sortBy: sortConfig.column,
+                    sortOrder: sortConfig.direction
+                });
+
+                const response = await fetch(`/api/tasks/past?${params}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    setTasks(data.tasks);
+                    setTotalPages(data.pagination.totalPages);
+                }
+            } catch (error) {
+                console.error("Error fetching tasks:", error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
         fetchTasks();
     }, [currentPage, selectedCategory, sortConfig]);
 
@@ -154,25 +153,25 @@ const PastTask = () => {
             <Table>
                 <TableHeader>
                     <TableRow>
-                        <TableHead>Sr. No</TableHead>
-                        <TableHead onClick={() => handleSort('title')} className="cursor-pointer">
+                        <TableHead className="w-[80px]  text-center">Sr. No</TableHead>
+                        <TableHead className="w-[300px] cursor-pointer" onClick={() => handleSort('title')}>
                             Title <SortIcon column="title" />
                         </TableHead>
-                        <TableHead>Category</TableHead>
-                        <TableHead onClick={() => handleSort('endTime')} className="cursor-pointer">
+                        <TableHead className="w-[150px] text-center">Category</TableHead>
+                        <TableHead className="w-[150px] cursor-pointer text-center" onClick={() => handleSort('endTime')}>
                             Ended On <SortIcon column="endTime" />
                         </TableHead>
-                        <TableHead>Actions</TableHead>
+                        <TableHead className="w-[120px] text-center">Actions</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
                     {tasks.map((task, index) => (
                         <TableRow key={task._id}>
-                            <TableCell>{(currentPage - 1) * 12 + index + 1}</TableCell>
+                            <TableCell className="text-center">{(currentPage - 1) * 12 + index + 1}</TableCell>
                             <TableCell>{task.title}</TableCell>
-                            <TableCell>{task.category}</TableCell>
-                            <TableCell>{new Date(task.endTime).toLocaleDateString()}</TableCell>
-                            <TableCell>
+                            <TableCell className="text-center">{task.category}</TableCell>
+                            <TableCell className="text-center">{new Date(task.endTime).toLocaleDateString()}</TableCell>
+                            <TableCell className="text-center">
                                 <Button variant="link" onClick={() => setSelectedTask(task)}>
                                     More Details
                                 </Button>
@@ -235,6 +234,18 @@ const PastTask = () => {
                 </DialogContent>
             </Dialog>
         </div>
+    );
+};
+
+const PastTask = () => {
+    return (
+        <Suspense fallback={
+            <div className="flex items-center justify-center min-h-screen">
+                <Loader2 className="h-8 w-8 animate-spin" />
+            </div>
+        }>
+            <TaskContent />
+        </Suspense>
     );
 };
 

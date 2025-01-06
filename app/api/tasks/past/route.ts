@@ -41,6 +41,7 @@ export async function GET(req: NextRequest) {
             }
         });
     } catch (error) {
+        console.error('Error fetching past tasks:', error);
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
     }
 }
