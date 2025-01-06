@@ -33,6 +33,7 @@ import {
 } from "@/components/ui/pagination";
 import { ChevronUp, ChevronDown, Loader2 } from "lucide-react";
 import { Task } from "@/types/challenge";
+import { Skeleton } from "./ui/skeleton";
 
 interface SortConfig {
     column: string;
@@ -125,8 +126,58 @@ const TaskContent = () => {
 
     if (isLoading) {
         return (
-            <div className="flex items-center justify-center min-h-screen">
-                <Loader2 className="h-8 w-8 animate-spin" />
+            <div className="space-y-4">
+                <div className="flex justify-end">
+                    <Skeleton className="w-[180px] h-10" />
+                </div>
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead className="w-[80px]">
+                                <Skeleton className="h-4 w-8 mx-auto" />
+                            </TableHead>
+                            <TableHead className="w-[300px]">
+                                <Skeleton className="h-4 w-[250px]" />
+                            </TableHead>
+                            <TableHead className="w-[150px]">
+                                <Skeleton className="h-4 w-20 mx-auto" />
+                            </TableHead>
+                            <TableHead className="w-[150px]">
+                                <Skeleton className="h-4 w-24 mx-auto" />
+                            </TableHead>
+                            <TableHead className="w-[150px]">
+                                <Skeleton className="h-4 w-24 mx-auto" />
+                            </TableHead>
+                            <TableHead className="w-[120px]">
+                                <Skeleton className="h-4 w-24 mx-auto" />
+                            </TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {Array(11).fill(0).map((_, i) => (
+                            <TableRow key={i}>
+                                <TableCell className="text-center">
+                                    <Skeleton className="h-4 w-8 mx-auto" />
+                                </TableCell>
+                                <TableCell>
+                                    <Skeleton className="h-4 w-[250px]" />
+                                </TableCell>
+                                <TableCell className="text-center">
+                                    <Skeleton className="h-4 w-20 mx-auto" />
+                                </TableCell>
+                                <TableCell className="text-center">
+                                    <Skeleton className="h-4 w-24 mx-auto" />
+                                </TableCell>
+                                <TableCell className="text-center">
+                                    <Skeleton className="h-4 w-24 mx-auto" />
+                                </TableCell>
+                                <TableCell className="text-center">
+                                    <Skeleton className="h-8 w-24 mx-auto" />
+                                </TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
             </div>
         );
     }
