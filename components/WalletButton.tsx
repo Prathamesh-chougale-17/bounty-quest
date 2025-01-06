@@ -7,7 +7,6 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from './ui/dropdown-menu';
-import { Copy } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useWalletModal } from '@solana/wallet-adapter-react-ui';
 
