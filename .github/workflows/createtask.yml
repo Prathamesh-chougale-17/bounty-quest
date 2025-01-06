@@ -2,7 +2,7 @@ name: Create Task
 
 on:
   schedule:
-    - cron: "0 9 * * *" # Runs every day at 9:00 AM
+    - cron: "30 1 * * *" # Runs every day at 7:00 AM IST (1:30 AM UTC)
 
 jobs:
   test-cron-job:
@@ -13,9 +13,8 @@ jobs:
         run: echo "Cron job executed at $(date)"
 
       - name: Call API
-        env:
-          API_URL: ${{ secrets.CREATE_TASK_API }}
         run: |
-          curl -X POST "$API_URL" \
+          curl -X POST ${{ secrets.CREATE_TASK_API }} \
           -H "Content-Type: application/json" \
+          -H "Authorization: Bearer ${{ secrets.AUTHENTICATION_TOKEN }}" \
           -d '{"durationHours": 21}'
