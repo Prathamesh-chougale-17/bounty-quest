@@ -6,12 +6,22 @@ import {
     AlertDialogContent,
     AlertDialogHeader,
     AlertDialogTitle,
+    AlertDialogOverlay,
 } from "@/components/ui/alert-dialog";
-import { useMemo } from 'react';
+import { useMemo, useEffect } from 'react';
 import Image from 'next/image';
 
 export function WalletModal() {
     const { wallets, select, connected } = useWallet();
+
+    useEffect(() => {
+        const mainContent = document.querySelector('main');
+        if (!connected && mainContent) {
+            mainContent.classList.add('blur-sm');
+        } else if (mainContent) {
+            mainContent.classList.remove('blur-sm');
+        }
+    }, [connected]);
 
     const [listedWallets] = useMemo(() => {
         const installed = wallets.filter(
@@ -53,6 +63,7 @@ export function WalletModal() {
                     ))}
                 </div>
             </AlertDialogContent>
+            <AlertDialogOverlay className="bg-background/80 backdrop-blur-sm" />
         </AlertDialog>
     );
 }
