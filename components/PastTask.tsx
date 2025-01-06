@@ -158,6 +158,9 @@ const TaskContent = () => {
                             Title <SortIcon column="title" />
                         </TableHead>
                         <TableHead className="w-[150px] text-center">Category</TableHead>
+                        <TableHead className="w-[150px] cursor-pointer text-center" onClick={() => handleSort('rewards.usdcAmount')}>
+                            Rewards <SortIcon column="rewards.usdcAmount" />
+                        </TableHead>
                         <TableHead className="w-[150px] cursor-pointer text-center" onClick={() => handleSort('endTime')}>
                             Ended On <SortIcon column="endTime" />
                         </TableHead>
@@ -170,6 +173,7 @@ const TaskContent = () => {
                             <TableCell className="text-center">{(currentPage - 1) * 12 + index + 1}</TableCell>
                             <TableCell>{task.title}</TableCell>
                             <TableCell className="text-center">{task.category}</TableCell>
+                            <TableCell className="text-center">{task.rewards.usdcAmount} USDC</TableCell>
                             <TableCell className="text-center">{new Date(task.endTime).toLocaleDateString()}</TableCell>
                             <TableCell className="text-center">
                                 <Button variant="link" onClick={() => setSelectedTask(task)}>
