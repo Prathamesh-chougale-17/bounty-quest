@@ -13,8 +13,8 @@ import { Twitter } from "lucide-react";
 
 export default function LoginPage() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-blue-100 to-purple-100">
-      <Card className="w-[380px] shadow-lg">
+    <div className="min-h-screen flex items-center justify-center">
+      <Card className="w-[380px] bg-transparent border-none shadow-none">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-bold">Welcome Back</CardTitle>
           <CardDescription>Sign in to your account to continue</CardDescription>

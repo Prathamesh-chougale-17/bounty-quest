@@ -10,7 +10,7 @@ const isAuthenticationRoute = (path: string) => {
   return false;
 };
 const isProtected = (path: string) => {
-  return path.startsWith("/task/");
+  return path.startsWith("/tasks/");
 };
 export default auth((req) => {
   if (req.auth && isAuthenticationRoute(req.nextUrl.pathname)) {

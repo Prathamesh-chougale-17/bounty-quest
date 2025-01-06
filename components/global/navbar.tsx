@@ -8,6 +8,7 @@ import ModeToggle from "./darkmode";
 import Image from "next/image";
 import { WalletButton } from "../WalletButton";
 import { signOut } from "next-auth/react";
+import { useSession } from "next-auth/react";
 
 const routes = [
   { href: "/", label: "Home" },
@@ -18,6 +19,7 @@ const routes = [
 
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
+  const { data: session } = useSession();
 
   return (
     <nav className="fixed top-0 z-10 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -74,17 +76,44 @@ export function Navbar() {
               {route.label}
             </Link>
           ))}
-          <WalletButton />
           <ModeToggle />
-          <Button variant="default" onClick={() => signOut()}>
-            Sign Out
-          </Button>
+          <WalletButton />
+          {session ? (
+            <Button
+              onClick={() => signOut()}
+              variant="outline"
+              className="text-sm"
+            >
+              Sign Out
+            </Button>
+          ) : (
+            <Link href="/login">
+              <Button variant="outline" className="text-sm">
+                Sign In
+              </Button>
+            </Link>
+          )}
         </div>
 
         {/* Mobile Actions */}
         <div className="md:hidden flex ml-auto items-center gap-2">
           <ModeToggle />
           <WalletButton />
+          {session ? (
+            <Button
+              onClick={() => signOut()}
+              variant="outline"
+              className="text-sm"
+            >
+              Sign Out
+            </Button>
+          ) : (
+            <Link href="/login">
+              <Button variant="outline" className="text-sm">
+                Sign In
+              </Button>
+            </Link>
+          )}
         </div>
       </div>
     </nav>

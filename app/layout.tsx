@@ -7,6 +7,7 @@ import "@rainbow-me/rainbowkit/styles.css";
 import { Toaster } from "@/components/ui/toaster";
 import AppWalletProvider from "@/components/AppWalletProvider";
 import Footer from "@/components/global/footer";
+import { SessionProvider } from "next-auth/react";
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
   variable: "--font-geist-sans",
@@ -33,19 +34,21 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <AppWalletProvider>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
-          >
-            <Navbar />
-            <main className="min-h-screen pt-16">{children}</main>
-            <Footer />
-            <Toaster />
-          </ThemeProvider>
-        </AppWalletProvider>
+        <SessionProvider>
+          <AppWalletProvider>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="system"
+              enableSystem
+              disableTransitionOnChange
+            >
+              <Navbar />
+              <main className="min-h-screen pt-16">{children}</main>
+              <Footer />
+              <Toaster />
+            </ThemeProvider>
+          </AppWalletProvider>
+        </SessionProvider>
       </body>
     </html>
   );
