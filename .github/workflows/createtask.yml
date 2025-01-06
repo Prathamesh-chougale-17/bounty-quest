@@ -2,7 +2,7 @@ name: Create Task
 
 on:
   schedule:
-    - cron: "0 9 * * *" # Runs every day at 9:00 AM
+    - cron: "30 1 * * *" # Runs every day at 9:00 AM
 
 jobs:
   test-cron-job:
