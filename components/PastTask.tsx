@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import {
     Table,
     TableBody,
@@ -39,16 +40,34 @@ interface SortConfig {
 }
 
 const PastTask = () => {
+    const router = useRouter();
+    const searchParams = useSearchParams();
     const [tasks, setTasks] = useState<Task[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [selectedTask, setSelectedTask] = useState<Task | null>(null);
-    const [currentPage, setCurrentPage] = useState(1);
+    const [currentPage, setCurrentPage] = useState(() =>
+        Number(searchParams.get("page")) || 1
+    );
     const [totalPages, setTotalPages] = useState(1);
-    const [selectedCategory, setSelectedCategory] = useState<string>('all');
-    const [sortConfig, setSortConfig] = useState<SortConfig>({
-        column: 'endTime',
-        direction: 'desc'
-    });
+    const [selectedCategory, setSelectedCategory] = useState<string>(() =>
+        searchParams.get("category") || 'all'
+    );
+    const [sortConfig, setSortConfig] = useState<SortConfig>(() => ({
+        column: searchParams.get("sortBy") || 'endTime',
+        direction: (searchParams.get("sortOrder") as 'asc' | 'desc') || 'desc'
+    }));
+
+    const updateSearchParams = (updates: Record<string, string>) => {
+        const params = new URLSearchParams(searchParams.toString());
+        Object.entries(updates).forEach(([key, value]) => {
+            if (value) {
+                params.set(key, value);
+            } else {
+                params.delete(key);
+            }
+        });
+        router.push(`?${params.toString()}`);
+    };
 
     const fetchTasks = async () => {
         setIsLoading(true);
@@ -78,15 +97,26 @@ const PastTask = () => {
     }, [currentPage, selectedCategory, sortConfig]);
 
     const handleSort = (column: string) => {
-        setSortConfig(prev => ({
-            column,
-            direction: prev.column === column && prev.direction === 'asc' ? 'desc' : 'asc'
-        }));
+        const newDirection = sortConfig.column === column && sortConfig.direction === 'asc' ? 'desc' : 'asc';
+        setSortConfig({ column, direction: newDirection });
+        updateSearchParams({
+            sortBy: column,
+            sortOrder: newDirection
+        });
     };
 
     const handleCategoryChange = (value: string) => {
         setSelectedCategory(value);
-        setCurrentPage(1); // Reset to first page
+        setCurrentPage(1);
+        updateSearchParams({
+            category: value === 'all' ? '' : value,
+            page: '1'
+        });
+    };
+
+    const handlePageChange = (page: number) => {
+        setCurrentPage(page);
+        updateSearchParams({ page: page.toString() });
     };
 
     const SortIcon = ({ column }: { column: string }) => {
@@ -143,7 +173,7 @@ const PastTask = () => {
                             <TableCell>{task.category}</TableCell>
                             <TableCell>{new Date(task.endTime).toLocaleDateString()}</TableCell>
                             <TableCell>
-                                <Button variant="outline" onClick={() => setSelectedTask(task)}>
+                                <Button variant="link" onClick={() => setSelectedTask(task)}>
                                     More Details
                                 </Button>
                             </TableCell>
@@ -156,14 +186,14 @@ const PastTask = () => {
                 <PaginationContent>
                     <PaginationItem>
                         <PaginationPrevious
-                            onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                            onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
                             aria-disabled={currentPage === 1}
                         />
                     </PaginationItem>
                     {[...Array(totalPages)].map((_, i) => (
                         <PaginationItem key={i}>
                             <PaginationLink
-                                onClick={() => setCurrentPage(i + 1)}
+                                onClick={() => handlePageChange(i + 1)}
                                 isActive={currentPage === i + 1}
                             >
                                 {i + 1}
@@ -172,7 +202,7 @@ const PastTask = () => {
                     ))}
                     <PaginationItem>
                         <PaginationNext
-                            onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                            onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
                             aria-disabled={currentPage === totalPages}
                         />
                     </PaginationItem>
