@@ -52,7 +52,6 @@ export function WalletButton() {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
                 <DropdownMenuItem onClick={copyAddress}>
-                    <Copy className="mr-2 h-4 w-4" />
                     Copy address
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={disconnect}>
