@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useMemo, useEffect } from 'react';
 import Image from 'next/image';
+import { Button } from './ui/button';
 
 export function WalletModal() {
     const { wallets, select, connected } = useWallet();
@@ -113,6 +114,13 @@ export function WalletModal() {
                         </div>
                     )}
                 </div>
+                <Button
+                    variant="outline"
+                    onClick={() => window.location.href = '/'}
+                    className="mb-4"
+                >
+                    Return to Home
+                </Button>
             </AlertDialogContent>
             <AlertDialogOverlay className="bg-background/80 backdrop-blur-sm" />
         </AlertDialog>
