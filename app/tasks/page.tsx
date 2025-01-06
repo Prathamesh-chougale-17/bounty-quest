@@ -11,14 +11,14 @@ export default function TasksPage() {
         </h1>
 
         <div className="mb-16">
-          <h2 className="text-2xl font-semibold mb-6 pb-3">
+          <h2 className="text-2xl font-semibold">
             Today&apos;s Tasks
           </h2>
           <TaskDashboard />
         </div>
 
-        <div className="mt-12">
-          <h2 className="text-2xl font-semibold mb-6 pb-3">
+        <div className="mt-6">
+          <h2 className="text-2xl font-semibold">
             Previous Tasks History
           </h2>
           <PastTask />

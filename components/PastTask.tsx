@@ -123,16 +123,8 @@ const TaskContent = () => {
         return sortConfig.direction === 'asc' ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />;
     };
 
-    if (isLoading) {
-        return (
-            <div className="flex items-center justify-center min-h-screen">
-                <Loader2 className="h-8 w-8 animate-spin" />
-            </div>
-        );
-    }
-
     return (
-        <div className="container mx-auto py-10">
+        <div className="container mx-auto">
             <div className="flex justify-end mb-4">
                 <Select
                     value={selectedCategory}
