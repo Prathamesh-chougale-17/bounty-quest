@@ -1,36 +1,97 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import {
-    Card,
-    CardContent,
-    CardHeader,
-    CardTitle,
-    CardDescription,
-} from "@/components/ui/card";
-import { Award, Loader2, CheckCircle2 } from "lucide-react";
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from "@/components/ui/table";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog";
+import {
+    Pagination,
+    PaginationContent,
+    PaginationItem,
+    PaginationLink,
+    PaginationNext,
+    PaginationPrevious,
+} from "@/components/ui/pagination";
+import { ChevronUp, ChevronDown, Loader2 } from "lucide-react";
 import { Task } from "@/types/challenge";
-import { Badge } from "@/components/ui/badge";
+
+interface SortConfig {
+    column: string;
+    direction: 'asc' | 'desc';
+}
 
 const PastTask = () => {
-    const [tasks, setTasks] = useState<Task[] | null>(null);
+    const [tasks, setTasks] = useState<Task[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [selectedCategory, setSelectedCategory] = useState<string>('all');
+    const [sortConfig, setSortConfig] = useState<SortConfig>({
+        column: 'endTime',
+        direction: 'desc'
+    });
 
-    useEffect(() => {
-        fetchPastTasks();
-    }, []);
-
-    const fetchPastTasks = async () => {
+    const fetchTasks = async () => {
+        setIsLoading(true);
         try {
-            const response = await fetch("/api/tasks/past");
+            const params = new URLSearchParams({
+                page: currentPage.toString(),
+                ...(selectedCategory !== 'all' && { category: selectedCategory }),
+                sortBy: sortConfig.column,
+                sortOrder: sortConfig.direction
+            });
+
+            const response = await fetch(`/api/tasks/past?${params}`);
             if (response.ok) {
                 const data = await response.json();
-                setTasks(data.checkTaskStatus);
+                setTasks(data.tasks);
+                setTotalPages(data.pagination.totalPages);
             }
         } catch (error) {
-            console.error("Error fetching past tasks:", error);
+            console.error("Error fetching tasks:", error);
         } finally {
             setIsLoading(false);
         }
+    };
+
+    useEffect(() => {
+        fetchTasks();
+    }, [currentPage, selectedCategory, sortConfig]);
+
+    const handleSort = (column: string) => {
+        setSortConfig(prev => ({
+            column,
+            direction: prev.column === column && prev.direction === 'asc' ? 'desc' : 'asc'
+        }));
+    };
+
+    const handleCategoryChange = (value: string) => {
+        setSelectedCategory(value);
+        setCurrentPage(1); // Reset to first page
+    };
+
+    const SortIcon = ({ column }: { column: string }) => {
+        if (sortConfig.column !== column) return null;
+        return sortConfig.direction === 'asc' ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />;
     };
 
     if (isLoading) {
@@ -41,54 +102,108 @@ const PastTask = () => {
         );
     }
 
-    if (!tasks || tasks.length === 0) {
-        return (
-            <Card className="max-w-4xl mx-auto mt-8">
-                <CardContent className="p-6">
-                    <div className="flex items-center justify-center">
-                        <span>No past tasks found.</span>
-                    </div>
-                </CardContent>
-            </Card>
-        );
-    }
-
     return (
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 p-6">
-            {tasks.map((task) => (
-                <Card
-                    key={task._id}
-                    className="overflow-hidden hover:shadow-lg transition-shadow duration-300"
+        <div className="container mx-auto py-10">
+            <div className="flex justify-end mb-4">
+                <Select
+                    value={selectedCategory}
+                    onValueChange={handleCategoryChange}
                 >
-                    <CardHeader className="bg-gradient-to-r from-green-500/10 to-blue-500/10 pb-4">
-                        <div className="flex items-center justify-between">
-                            <Badge variant="outline" className="bg-white/90 dark:bg-gray-800">
-                                Completed
-                            </Badge>
-                            <CheckCircle2 className="h-6 w-6 text-green-500" />
-                        </div>
-                    </CardHeader>
-                    <CardContent className="pt-6">
-                        <CardTitle className="text-xl mb-2">{task.title}</CardTitle>
-                        <CardDescription className="text-sm text-gray-600 mb-4">
-                            {task.description}
-                        </CardDescription>
+                    <SelectTrigger className="w-[180px]">
+                        <SelectValue placeholder="Filter by category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="all">All Categories</SelectItem>
+                        <SelectItem value="blockchain">Blockchain</SelectItem>
+                        <SelectItem value="memes">Memes</SelectItem>
+                        <SelectItem value="nfts">NFTs</SelectItem>
+                    </SelectContent>
+                </Select>
+            </div>
 
-                        <div className="space-y-4">
-                            <div className="flex items-center space-x-2 text-green-600">
-                                <Award className="h-5 w-5" />
-                                <span className="font-medium">
-                                    Earned: {task.rewards.usdcAmount} USDC
-                                </span>
-                            </div>
+            <Table>
+                <TableHeader>
+                    <TableRow>
+                        <TableHead>Sr. No</TableHead>
+                        <TableHead onClick={() => handleSort('title')} className="cursor-pointer">
+                            Title <SortIcon column="title" />
+                        </TableHead>
+                        <TableHead>Category</TableHead>
+                        <TableHead onClick={() => handleSort('endTime')} className="cursor-pointer">
+                            Ended On <SortIcon column="endTime" />
+                        </TableHead>
+                        <TableHead>Actions</TableHead>
+                    </TableRow>
+                </TableHeader>
+                <TableBody>
+                    {tasks.map((task, index) => (
+                        <TableRow key={task._id}>
+                            <TableCell>{(currentPage - 1) * 12 + index + 1}</TableCell>
+                            <TableCell>{task.title}</TableCell>
+                            <TableCell>{task.category}</TableCell>
+                            <TableCell>{new Date(task.endTime).toLocaleDateString()}</TableCell>
+                            <TableCell>
+                                <Button variant="outline" onClick={() => setSelectedTask(task)}>
+                                    More Details
+                                </Button>
+                            </TableCell>
+                        </TableRow>
+                    ))}
+                </TableBody>
+            </Table>
 
-                            <div className="text-sm text-gray-500">
-                                Completed on: {new Date(task.endTime).toLocaleDateString()}
-                            </div>
+            <Pagination className="mt-4">
+                <PaginationContent>
+                    <PaginationItem>
+                        <PaginationPrevious
+                            onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                            aria-disabled={currentPage === 1}
+                        />
+                    </PaginationItem>
+                    {[...Array(totalPages)].map((_, i) => (
+                        <PaginationItem key={i}>
+                            <PaginationLink
+                                onClick={() => setCurrentPage(i + 1)}
+                                isActive={currentPage === i + 1}
+                            >
+                                {i + 1}
+                            </PaginationLink>
+                        </PaginationItem>
+                    ))}
+                    <PaginationItem>
+                        <PaginationNext
+                            onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                            aria-disabled={currentPage === totalPages}
+                        />
+                    </PaginationItem>
+                </PaginationContent>
+            </Pagination>
+
+            <Dialog open={!!selectedTask} onOpenChange={() => setSelectedTask(null)}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>{selectedTask?.title}</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                        <p>{selectedTask?.description}</p>
+                        <div>
+                            <h4 className="font-semibold">Requirements:</h4>
+                            <ul className="list-disc pl-5">
+                                {selectedTask?.requirements.map((req, i) => (
+                                    <li key={i}>{req}</li>
+                                ))}
+                            </ul>
                         </div>
-                    </CardContent>
-                </Card>
-            ))}
+                        <div>
+                            <h4 className="font-semibold">Rewards:</h4>
+                            <p>USDC: {selectedTask?.rewards.usdcAmount}</p>
+                            {selectedTask?.rewards.nftReward && (
+                                <p>NFT: {selectedTask.rewards.nftReward}</p>
+                            )}
+                        </div>
+                    </div>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 };
