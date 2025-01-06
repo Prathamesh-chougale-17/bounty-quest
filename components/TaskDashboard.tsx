@@ -7,11 +7,12 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
-import { Award, Loader2, Trophy, Clock } from "lucide-react";
+import { Award, Trophy, Clock } from "lucide-react";
 import { Task } from "@/types/challenge";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export const revalidate = 60
 
@@ -74,8 +75,36 @@ const TaskDashboard = () => {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="h-8 w-8 animate-spin" />
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 p-6">
+        {Array(3).fill(0).map((_, i) => (
+          <Card key={i} className="overflow-hidden">
+            <CardHeader className="bg-gradient-to-r from-purple-500/10 to-blue-500/10 pb-4">
+              <div className="flex items-center justify-between">
+                <Skeleton className="h-5 w-16" />
+                <Skeleton className="h-6 w-6 rounded-full" />
+              </div>
+            </CardHeader>
+            <CardContent className="pt-6 space-y-4">
+              <Skeleton className="h-6 w-3/4" />
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-5/6" />
+
+              <div className="space-y-4">
+                <div className="flex items-center space-x-2">
+                  <Skeleton className="h-5 w-5" />
+                  <Skeleton className="h-4 w-32" />
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <Skeleton className="h-5 w-5" />
+                  <Skeleton className="h-4 w-24" />
+                </div>
+              </div>
+
+              <Skeleton className="h-10 w-full mt-6" />
+            </CardContent>
+          </Card>
+        ))}
       </div>
     );
   }
