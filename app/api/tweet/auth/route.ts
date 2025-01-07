@@ -101,11 +101,11 @@ export async function POST(req: Request) {
     // Store user data in MongoDB
     await db.collection("users").insertOne({
       publicKey,
-      twitterId: adaptedTweet.author_id,
+      twitterId: tweetId,
       twitterName: adaptedTweet.authorName,
       twitterUsername: adaptedTweet.author,
       profileImageUrl: adaptedTweet.authorImage,
-      id: tweetId,
+      authorId: adaptedTweet.author_id,
       url: tweetUrl,
       text: adaptedTweet.text,
       createdAt: new Date(),
