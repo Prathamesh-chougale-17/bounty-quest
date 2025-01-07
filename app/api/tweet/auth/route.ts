@@ -81,34 +81,39 @@ export async function POST(req: Request) {
     const db = client.db("tweetcontest");
 
     // Store verification data with more details
-    const userData = {
-      publicKey,
-      twitterId: adaptedTweet.author_id,
-      twitterUsername: adaptedTweet.authorName,
-      twitterName: adaptedTweet.authorName,
-      profileImageUrl: adaptedTweet.authorImage,
-      verificationTweet: {
-        id: tweetId,
-        url: tweetUrl,
-        text: adaptedTweet.text,
-        metrics: adaptedTweet.public_metrics,
-        createdAt: adaptedTweet.created_at,
-      },
-      verified: true,
-      verifiedAt: new Date(),
-      lastUpdated: new Date(),
-    };
+    // const userData = {
+    //   publicKey,
+    //   twitterId: adaptedTweet.author_id,
+    //   twitterUsername: adaptedTweet.author,
+    //   twitterName: adaptedTweet.authorName,
+    //   profileImageUrl: adaptedTweet.authorImage,
+    //   verificationTweet: {
+    //     id: tweetId,
+    //     url: tweetUrl,
+    //     text: adaptedTweet.text,
+    //     metrics: adaptedTweet.public_metrics,
+    //     createdAt: adaptedTweet.created_at,
+    //   },
+    //   verifiedAt: new Date(),
+    //   lastUpdated: new Date(),
+    // };
 
     // Store user data in MongoDB
     await db.collection("users").insertOne({
-      ...userData,
+      publicKey,
+      twitterId: adaptedTweet.author_id,
+      twitterName: adaptedTweet.authorName,
+      twitterUsername: adaptedTweet.author,
+      profileImageUrl: adaptedTweet.authorImage,
+      id: tweetId,
+      url: tweetUrl,
+      text: adaptedTweet.text,
       createdAt: new Date(),
     });
 
     return NextResponse.json({
       success: true,
       message: "Wallet verified successfully",
-      user: userData,
     });
   } catch (error) {
     console.error("Error verifying tweet:", error);

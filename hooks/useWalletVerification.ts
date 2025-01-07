@@ -8,7 +8,8 @@ export function useWalletVerification() {
 
   useEffect(() => {
     async function checkVerification() {
-      if (!publicKey) {
+      //   console.log(publicKey?.toBase58());
+      if (!publicKey?.toBase58()) {
         setIsVerified(false);
         setLoading(false);
         return;
@@ -16,7 +17,7 @@ export function useWalletVerification() {
 
       try {
         const response = await fetch("/api/auth", {
-          method: "GET",
+          method: "POST",
           headers: {
             "Content-Type": "application/json",
           },

@@ -6,14 +6,13 @@ async function checkPublicKeyExists(publicKey: string) {
   const db = client.db("tweetcontest");
 
   const existingUser = await db.collection("users").findOne({
-    "userData.publicKey": publicKey,
-    "userData.verified": true,
+    publicKey: publicKey,
   });
 
   return existingUser;
 }
 
-export async function GET(request: Request) {
+export async function POST(request: Request) {
   try {
     const { publicKey } = await request.json();
     if (!publicKey) {
@@ -24,7 +23,8 @@ export async function GET(request: Request) {
     }
 
     const exists = await checkPublicKeyExists(publicKey);
-    return NextResponse.json({ exists });
+    // return true if public key exists
+    return NextResponse.json({ exists: !!exists });
   } catch (error) {
     console.error("Error checking verification:", error);
     return NextResponse.json({ error: "Invalid public key" }, { status: 400 });

@@ -138,7 +138,7 @@ export async function POST(request: Request) {
       taskId: taskData._id,
       tweetId: adaptedTweet.id,
       authorId: adaptedTweet.author_id,
-      authorUsername: adaptedTweet.authorName,
+      authorUsername: adaptedTweet.author,
       authorName: adaptedTweet.authorName,
       tweetText: adaptedTweet.text,
       scores: {

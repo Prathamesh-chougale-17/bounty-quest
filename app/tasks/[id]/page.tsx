@@ -25,6 +25,7 @@ const TaskById = ({ params }: { params: { id: string } }) => {
     minutes: number;
     seconds: number;
   } | null>(null);
+  console.log(isVerified);
 
   useEffect(() => {
     const fetchTask = async () => {
