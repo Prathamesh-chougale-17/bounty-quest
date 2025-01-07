@@ -41,7 +41,6 @@ export async function POST(request: Request) {
     }
     if (exists) {
       if (submitted) {
-        console.log("Already submitted:", submitted.tweetId);
         return NextResponse.json({
           pagestate: "submitted",
           twitterId: submitted.tweetId,
