@@ -1,5 +1,4 @@
-"use client";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import {
   Card,
   CardContent,
@@ -8,110 +7,42 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Award, Clock, ArrowLeft, Loader2 } from "lucide-react";
+import { Award, Clock, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { Task } from "@/types/challenge";
-import TwitterSubmissionForm from "@/components/TwitterSubmissionForm";
-import { XWalletMapper } from "@/components/XWalletMapper";
-import { useWalletVerification } from "@/hooks/useWalletVerification";
-import ClientTweetCard from "@/components/ClientTweetCard";
-import { useWallet } from "@solana/wallet-adapter-react";
+import dynamic from "next/dynamic";
 
-const TaskById = ({ params }: { params: { id: string } }) => {
-  const publicKey = useWallet().publicKey?.toBase58();
-  const { isVerified, loading: verificationLoading } = useWalletVerification();
-  const [task, setTask] = useState<Task | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [timeLeft, setTimeLeft] = useState<{
-    hours: number;
-    minutes: number;
-    seconds: number;
-  } | null>(null);
-  const [submittedTweetId, setSubmittedTweetId] = useState<string | null>(null);
-  console.log(isVerified);
+// Import client components dynamically
+const TaskSubmissionSection = dynamic(
+  () => import("@/components/TaskSubmissionSection"),
+  { ssr: false }
+);
 
-  useEffect(() => {
-    const fetchTask = async () => {
-      try {
-        const response = await fetch(`/api/tasks/active/${params.id}`);
-        if (!response.ok) throw new Error("Task not found");
-        const data = await response.json();
-        setTask(data.task);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to fetch task");
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchTask();
-  }, [params.id]);
+const Timer = dynamic(() => import("@/components/Timer"), { ssr: false });
 
-  useEffect(() => {
-    if (!task) return;
+async function getTask(id: string): Promise<Task> {
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/api/tasks/active/${id}`,
+    {
+      next: { revalidate: 60 }, // Revalidate every minute
+    }
+  );
 
-    const timer = setInterval(() => {
-      const endTime = new Date(task.endTime).getTime();
-      const now = new Date().getTime();
-      const timeLeft = endTime - now;
+  if (!response.ok) throw new Error("Task not found");
+  const data = await response.json();
+  return data.task;
+}
 
-      setTimeLeft({
-        hours: Math.floor(
-          (timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
-        ),
-        minutes: Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60)),
-        seconds: Math.floor((timeLeft % (1000 * 60)) / 1000),
-      });
-    }, 1000);
+export default async function TaskById({ params }: { params: { id: string } }) {
+  const task = await getTask(params.id);
 
-    return () => clearInterval(timer);
-  }, [task]);
-
-  useEffect(() => {
-    const checkSubmission = async () => {
-      if (!isVerified) return;
-
-      try {
-        const response = await fetch("/api/tweet/submitted", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            publicKey,
-            taskId: params.id,
-          }),
-        });
-
-        const data = await response.json();
-        if (data.twitterId) {
-          setSubmittedTweetId(data.twitterId);
-        }
-      } catch (error) {
-        console.error("Failed to check submission:", error);
-      }
-    };
-
-    checkSubmission();
-  }, [isVerified, params.id]);
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800">
-        <Loader2 className="h-12 w-12 animate-spin text-purple-600" />
-      </div>
-    );
-  }
-
-  if (error || !task) {
+  if (!task) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800 p-6">
         <Card className="max-w-4xl mx-auto mt-8 border-red-200 shadow-lg">
           <CardContent className="p-8">
             <div className="text-center space-y-4">
-              <p className="text-red-500 text-lg font-medium">
-                {error || "Task not found"}
-              </p>
+              <p className="text-red-500 text-lg font-medium">Task not found</p>
               <Link href="/">
                 <Button variant="outline" className="hover:bg-red-50">
                   <ArrowLeft className="mr-2 h-4 w-4" />
@@ -124,48 +55,6 @@ const TaskById = ({ params }: { params: { id: string } }) => {
       </div>
     );
   }
-
-  const renderContent = () => {
-    if (verificationLoading) {
-      return (
-        <div className="animate-pulse">Loading verification status...</div>
-      );
-    }
-
-    if (!isVerified) {
-      return (
-        <Card className="border border-purple-100 dark:border-purple-900 shadow-xl bg-white/80 dark:bg-gray-800/90">
-          <CardContent className="p-8">
-            <div className="mb-4 text-center text-red-500">
-              Please verify your wallet before participating
-            </div>
-            <XWalletMapper />
-          </CardContent>
-        </Card>
-      );
-    }
-
-    return (
-      <>
-        {submittedTweetId ? (
-          <Card className="border border-purple-100 dark:border-purple-900 shadow-xl bg-white/80 dark:bg-gray-800/90">
-            <CardHeader>
-              <CardTitle>Your Submission</CardTitle>
-            </CardHeader>
-            <CardContent className="p-8">
-              <ClientTweetCard id={submittedTweetId} />
-            </CardContent>
-          </Card>
-        ) : (
-          <Card className="border border-purple-100 dark:border-purple-900 shadow-xl bg-white/80 dark:bg-gray-800/90">
-            <CardContent className="p-8">
-              <TwitterSubmissionForm task={task} />
-            </CardContent>
-          </Card>
-        )}
-      </>
-    );
-  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800">
@@ -204,9 +93,7 @@ const TaskById = ({ params }: { params: { id: string } }) => {
                 <div className="flex items-center space-x-3 bg-blue-50 dark:bg-blue-900/30 p-3 rounded-lg">
                   <Clock className="h-6 w-6 text-blue-600 dark:text-blue-400" />
                   <span className="font-semibold text-xl text-blue-700 dark:text-blue-300">
-                    {timeLeft
-                      ? `${timeLeft.hours}h ${timeLeft.minutes}m ${timeLeft.seconds}s`
-                      : "Calculating..."}
+                    <Timer endtime={task.endTime} />
                   </span>
                 </div>
               </div>
@@ -231,11 +118,11 @@ const TaskById = ({ params }: { params: { id: string } }) => {
               </div>
             </CardContent>
           </Card>
-          <div className="space-y-6">{renderContent()}</div>
+          <div className="space-y-6">
+            <TaskSubmissionSection task={task} />
+          </div>
         </div>
       </div>
     </div>
   );
-};
-
-export default TaskById;
+}
