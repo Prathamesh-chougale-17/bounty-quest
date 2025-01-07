@@ -12,8 +12,11 @@ import { Award, Clock, ArrowLeft, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { Task } from "@/types/challenge";
 import TwitterSubmissionForm from "@/components/TwitterSubmissionForm";
+import { XWalletMapper } from "@/components/XWalletMapper";
+import { useWalletVerification } from "@/hooks/useWalletVerification";
 
 const TaskById = ({ params }: { params: { id: string } }) => {
+  const { isVerified, loading: verificationLoading } = useWalletVerification();
   const [task, setTask] = useState<Task | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -29,7 +32,6 @@ const TaskById = ({ params }: { params: { id: string } }) => {
         const response = await fetch(`/api/tasks/active/${params.id}`);
         if (!response.ok) throw new Error("Task not found");
         const data = await response.json();
-        console.log(data);
         setTask(data.task);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to fetch task");
@@ -89,6 +91,37 @@ const TaskById = ({ params }: { params: { id: string } }) => {
       </div>
     );
   }
+
+  const renderContent = () => {
+    if (verificationLoading) {
+      return (
+        <div className="animate-pulse">Loading verification status...</div>
+      );
+    }
+
+    if (!isVerified) {
+      return (
+        <Card className="border border-purple-100 dark:border-purple-900 shadow-xl bg-white/80 dark:bg-gray-800/90">
+          <CardContent className="p-8">
+            <div className="mb-4 text-center text-red-500">
+              Please verify your wallet before participating
+            </div>
+            <XWalletMapper />
+          </CardContent>
+        </Card>
+      );
+    }
+
+    return (
+      <>
+        <Card className="border border-purple-100 dark:border-purple-900 shadow-xl bg-white/80 dark:bg-gray-800/90">
+          <CardContent className="p-8">
+            <TwitterSubmissionForm task={task} />
+          </CardContent>
+        </Card>
+      </>
+    );
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800">
@@ -155,13 +188,7 @@ const TaskById = ({ params }: { params: { id: string } }) => {
             </CardContent>
           </Card>
 
-          <div className="space-y-6">
-            <Card className="border border-purple-100 dark:border-purple-900 shadow-xl bg-white/80 dark:bg-gray-800/90">
-              <CardContent className="p-8">
-                <TwitterSubmissionForm task={task} />
-              </CardContent>
-            </Card>
-          </div>
+          <div className="space-y-6">{renderContent()}</div>
         </div>
       </div>
     </div>

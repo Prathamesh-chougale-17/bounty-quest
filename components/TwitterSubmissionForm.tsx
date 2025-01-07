@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Loader2, CheckCircle, AlertCircle } from "lucide-react";
+import { useWallet } from "@solana/wallet-adapter-react";
 
 interface SubmissionResult {
   relevanceScore: number;
@@ -23,6 +24,7 @@ export default function TwitterSubmissionForm({ task }: Props) {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<SubmissionResult | null>(null);
   const [error, setError] = useState("");
+  const { publicKey } = useWallet();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,10 +33,14 @@ export default function TwitterSubmissionForm({ task }: Props) {
 
     try {
       // First fetch tweet data
-      const tweetResponse = await fetch("/api/tweet", {
+      const tweetResponse = await fetch("/api/tweet/analyze", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url, taskData: task }),
+        body: JSON.stringify({
+          url,
+          taskData: task,
+          publicKey: publicKey?.toBase58(),
+        }),
       });
 
       const res = await tweetResponse.json();
