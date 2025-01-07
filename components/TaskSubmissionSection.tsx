@@ -62,7 +62,7 @@ export default function TaskSubmissionSection({ task }: { task: Task }) {
 
   return (
     <>
-      {userPage === "authenticated" ? (
+      {userPage === "submitted" ? (
         <Card className="border border-purple-100 dark:border-purple-900 shadow-xl bg-white/80 dark:bg-gray-800/90">
           <CardHeader>
             <CardTitle>Your Submission</CardTitle>
