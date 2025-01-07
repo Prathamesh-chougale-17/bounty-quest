@@ -195,6 +195,8 @@ export const TweetMedia = ({ tweet }: { tweet: EnrichedTweet }) => (
             key={photo.url}
             src={photo.url}
             title={"Photo by " + tweet.user.name}
+            width={256}
+            height={256}
             alt={tweet.text}
             className="h-64 w-5/6 shrink-0 snap-center snap-always rounded-xl border object-cover shadow-sm"
           />

@@ -14,8 +14,11 @@ import { Task } from "@/types/challenge";
 import TwitterSubmissionForm from "@/components/TwitterSubmissionForm";
 import { XWalletMapper } from "@/components/XWalletMapper";
 import { useWalletVerification } from "@/hooks/useWalletVerification";
+import ClientTweetCard from "@/components/ClientTweetCard";
+import { useWallet } from "@solana/wallet-adapter-react";
 
 const TaskById = ({ params }: { params: { id: string } }) => {
+  const publicKey = useWallet().publicKey?.toBase58();
   const { isVerified, loading: verificationLoading } = useWalletVerification();
   const [task, setTask] = useState<Task | null>(null);
   const [loading, setLoading] = useState(true);
@@ -25,6 +28,7 @@ const TaskById = ({ params }: { params: { id: string } }) => {
     minutes: number;
     seconds: number;
   } | null>(null);
+  const [submittedTweetId, setSubmittedTweetId] = useState<string | null>(null);
   console.log(isVerified);
 
   useEffect(() => {
@@ -62,6 +66,34 @@ const TaskById = ({ params }: { params: { id: string } }) => {
 
     return () => clearInterval(timer);
   }, [task]);
+
+  useEffect(() => {
+    const checkSubmission = async () => {
+      if (!isVerified) return;
+
+      try {
+        const response = await fetch("/api/tweet/submitted", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            publicKey,
+            taskId: params.id,
+          }),
+        });
+
+        const data = await response.json();
+        if (data.twitterId) {
+          setSubmittedTweetId(data.twitterId);
+        }
+      } catch (error) {
+        console.error("Failed to check submission:", error);
+      }
+    };
+
+    checkSubmission();
+  }, [isVerified, params.id]);
 
   if (loading) {
     return (
@@ -115,11 +147,22 @@ const TaskById = ({ params }: { params: { id: string } }) => {
 
     return (
       <>
-        <Card className="border border-purple-100 dark:border-purple-900 shadow-xl bg-white/80 dark:bg-gray-800/90">
-          <CardContent className="p-8">
-            <TwitterSubmissionForm task={task} />
-          </CardContent>
-        </Card>
+        {submittedTweetId ? (
+          <Card className="border border-purple-100 dark:border-purple-900 shadow-xl bg-white/80 dark:bg-gray-800/90">
+            <CardHeader>
+              <CardTitle>Your Submission</CardTitle>
+            </CardHeader>
+            <CardContent className="p-8">
+              <ClientTweetCard id={submittedTweetId} />
+            </CardContent>
+          </Card>
+        ) : (
+          <Card className="border border-purple-100 dark:border-purple-900 shadow-xl bg-white/80 dark:bg-gray-800/90">
+            <CardContent className="p-8">
+              <TwitterSubmissionForm task={task} />
+            </CardContent>
+          </Card>
+        )}
       </>
     );
   };
@@ -188,7 +231,6 @@ const TaskById = ({ params }: { params: { id: string } }) => {
               </div>
             </CardContent>
           </Card>
-
           <div className="space-y-6">{renderContent()}</div>
         </div>
       </div>
