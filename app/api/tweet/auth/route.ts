@@ -101,7 +101,7 @@ export async function POST(req: Request) {
 
     // Store user data in MongoDB
     await db.collection("users").insertOne({
-      userData,
+      ...userData,
       createdAt: new Date(),
     });
 
