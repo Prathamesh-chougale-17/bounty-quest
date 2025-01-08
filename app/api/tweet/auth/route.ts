@@ -30,8 +30,7 @@ async function checkExistingVerification(publicKey: string) {
   const db = client.db("tweetcontest");
 
   const existingUser = await db.collection("users").findOne({
-    "userData.publicKey": publicKey,
-    "userData.verified": true,
+    publicKey: publicKey,
   });
 
   return existingUser;
@@ -79,24 +78,6 @@ export async function POST(req: Request) {
     // Connect to MongoDB
     const client = await clientPromise;
     const db = client.db("tweetcontest");
-
-    // Store verification data with more details
-    // const userData = {
-    //   publicKey,
-    //   twitterId: adaptedTweet.author_id,
-    //   twitterUsername: adaptedTweet.author,
-    //   twitterName: adaptedTweet.authorName,
-    //   profileImageUrl: adaptedTweet.authorImage,
-    //   verificationTweet: {
-    //     id: tweetId,
-    //     url: tweetUrl,
-    //     text: adaptedTweet.text,
-    //     metrics: adaptedTweet.public_metrics,
-    //     createdAt: adaptedTweet.created_at,
-    //   },
-    //   verifiedAt: new Date(),
-    //   lastUpdated: new Date(),
-    // };
 
     // Store user data in MongoDB
     await db.collection("users").insertOne({
