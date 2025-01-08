@@ -1,11 +1,11 @@
 // services/taskGeneratorService.ts
-import { GoogleGenerativeAI } from '@google/generative-ai';
-import clientPromise from '../lib/clientpromise';
-import { ObjectId } from 'mongodb';
+import { GoogleGenerativeAI } from "@google/generative-ai";
+import clientPromise from "../lib/clientpromise";
+import { ObjectId } from "mongodb";
 
 export interface GeneratedTask {
   description: string;
-  category: 'blockchain' | 'memes' | 'nfts';
+  category: "blockchain" | "memes" | "nfts";
   requirements: string[];
   evaluationCriteria: string[];
 }
@@ -13,7 +13,7 @@ export interface GeneratedTask {
 export class TaskGeneratorService {
   private static async generateTaskWithAI(): Promise<GeneratedTask> {
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
-    const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
+    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
     const prompt = `
       Generate a creative Twitter task related to one of these categories: blockchain, memes, or NFTs.
@@ -41,22 +41,26 @@ export class TaskGeneratorService {
     return JSON.parse(response.text());
   }
 
-  public static async createNewTask(durationHours: number = 4): Promise<string> {
+  public static async createNewTask(
+    durationHours: number = 4
+  ): Promise<string> {
     const task = await this.generateTaskWithAI();
 
     const client = await clientPromise;
-    const db = client.db('tweetcontest');
+    const db = client.db("tweetcontest");
 
     const startTime = new Date();
-    const endTime = new Date(startTime.getTime() + durationHours * 60 * 60 * 1000);
+    const endTime = new Date(
+      startTime.getTime() + durationHours * 60 * 60 * 1000
+    );
 
-    const result = await db.collection('tasks').insertOne({
+    const result = await db.collection("tasks").insertOne({
       ...task,
       startTime,
       endTime,
       isActive: true,
       winners: [],
-      _id: new ObjectId()
+      _id: new ObjectId(),
     });
 
     return result.insertedId.toString();
@@ -64,51 +68,62 @@ export class TaskGeneratorService {
 
   public static async getActiveTask() {
     const client = await clientPromise;
-    const db = client.db('tweetcontest');
+    const db = client.db("tweetcontest");
     // if task has ended, set isActive to false
     await this.checkTaskStatus();
-    return db.collection('tasks').find({ isActive: true }).toArray();
+    return db.collection("tasks").find({ isActive: true }).toArray();
+  }
+
+  public static async getActiveTaskById(taskId: string) {
+    const client = await clientPromise;
+    const db = client.db("tweetcontest");
+    return db
+      .collection("tasks")
+      .findOne({ _id: new ObjectId(taskId), isActive: true });
   }
 
   public static async getTaskById(taskId: string) {
     const client = await clientPromise;
-    const db = client.db('tweetcontest');
-    return db.collection('tasks').findOne({ _id: new ObjectId(taskId) });
+    const db = client.db("tweetcontest");
+    return db.collection("tasks").findOne({ _id: new ObjectId(taskId) });
   }
 
   public static async setTaskInactive(taskId: string) {
     const client = await clientPromise;
-    const db = client.db('tweetcontest');
-    return db.collection('tasks').updateOne(
-      { _id: new ObjectId(taskId) },
-      { $set: { isActive: false } }
-    );
+    const db = client.db("tweetcontest");
+    return db
+      .collection("tasks")
+      .updateOne({ _id: new ObjectId(taskId) }, { $set: { isActive: false } });
   }
 
   public static async getPastTasks() {
     const client = await clientPromise;
-    const db = client.db('tweetcontest');
-    return db.collection('tasks').find({ isActive: false }).toArray();
+    const db = client.db("tweetcontest");
+    return db.collection("tasks").find({ isActive: false }).toArray();
   }
 
   public static async setTaskWinner(taskId: string, winnerId: string) {
     const client = await clientPromise;
-    const db = client.db('tweetcontest');
-    return db.collection('tasks').updateOne(
-      { _id: new ObjectId(taskId) },
-      { $set: { winners: winnerId } }
-    );
+    const db = client.db("tweetcontest");
+    return db
+      .collection("tasks")
+      .updateOne(
+        { _id: new ObjectId(taskId) },
+        { $set: { winners: winnerId } }
+      );
   }
 
   // write a method to set the task as inactive if the end time has passed
   public static async checkTaskStatus() {
     const client = await clientPromise;
-    const db = client.db('tweetcontest');
+    const db = client.db("tweetcontest");
     const currentTime = new Date();
 
-    return db.collection('tasks').updateMany(
-      { endTime: { $lt: currentTime } },
-      { $set: { isActive: false } }
-    );
+    return db
+      .collection("tasks")
+      .updateMany(
+        { endTime: { $lt: currentTime } },
+        { $set: { isActive: false } }
+      );
   }
 }
