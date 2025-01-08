@@ -93,7 +93,11 @@ export default async function TaskById({ params }: { params: { id: string } }) {
                 <div className="flex items-center space-x-3 bg-blue-50 dark:bg-blue-900/30 p-3 rounded-lg">
                   <Clock className="h-6 w-6 text-blue-600 dark:text-blue-400" />
                   <span className="font-semibold text-xl text-blue-700 dark:text-blue-300">
-                    <Timer endtime={task.endTime} />
+                    {new Date(task.endTime) > new Date() ? (
+                      <Timer endtime={task.endTime} />
+                    ) : (
+                      "Task Ended"
+                    )}
                   </span>
                 </div>
               </div>
