@@ -1,5 +1,7 @@
 "use client";
-import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 import {
   Card,
   CardContent,
@@ -14,13 +16,30 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useWallet } from "@solana/wallet-adapter-react";
 import SampleTweet from "./SampleTweet";
 
+const tweetFormSchema = z.object({
+  tweetUrl: z
+    .string()
+    .min(1, "Tweet URL is required")
+    .regex(
+      /^https?:\/\/x\.com\/.+\/status\/.+$/,
+      "Please enter a valid Twitter URL"
+    ),
+});
+
+type FormData = z.infer<typeof tweetFormSchema>;
+
 export function XWalletMapper() {
-  const [tweetUrl, setTweetUrl] = useState("");
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<FormData>({
+    resolver: zodResolver(tweetFormSchema),
+  });
   const { toast } = useToast();
   const walletAddress = useWallet().publicKey?.toBase58();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const onSubmit = async (data: FormData) => {
     if (!walletAddress) {
       toast({
         title: "Error",
@@ -37,15 +56,15 @@ export function XWalletMapper() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          tweetUrl,
+          tweetUrl: data.tweetUrl,
           publicKey: walletAddress,
         }),
       });
 
-      const data = await response.json();
+      const responseData = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error);
+        throw new Error(responseData.error);
       }
 
       toast({
@@ -99,13 +118,14 @@ export function XWalletMapper() {
             />
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <Input
-              placeholder="Enter your tweet URL"
-              value={tweetUrl}
-              onChange={(e) => setTweetUrl(e.target.value)}
-              required
+              {...register("tweetUrl")}
+              placeholder="https://x.com/user/status/123..."
             />
+            {errors.tweetUrl && (
+              <p className="text-sm text-red-500">{errors.tweetUrl.message}</p>
+            )}
             <Button type="submit" className="w-full">
               Submit for Verification
             </Button>

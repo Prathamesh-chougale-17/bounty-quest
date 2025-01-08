@@ -1,4 +1,7 @@
 "use client";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 import { useState } from "react";
 import { Task } from "@/types/challenge";
 import { Button } from "@/components/ui/button";
@@ -6,6 +9,16 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Loader2, CheckCircle, AlertCircle } from "lucide-react";
 import { useWallet } from "@solana/wallet-adapter-react";
+
+const twitterSubmissionSchema = z.object({
+  tweetUrl: z
+    .string()
+    .min(1, "Tweet URL is required")
+    .regex(
+      /^https?:\/\/x\.com\/\w+\/status\/\d+/,
+      "Please enter a valid Twitter URL"
+    ),
+});
 
 interface SubmissionResult {
   relevanceScore: number;
@@ -19,25 +32,29 @@ interface Props {
   task: Task;
 }
 
+type FormValues = z.infer<typeof twitterSubmissionSchema>;
+
 export default function TwitterSubmissionForm({ task }: Props) {
-  const [url, setUrl] = useState("");
-  const [loading, setLoading] = useState(false);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<FormValues>({
+    resolver: zodResolver(twitterSubmissionSchema),
+  });
   const [result, setResult] = useState<SubmissionResult | null>(null);
   const [error, setError] = useState("");
   const { publicKey } = useWallet();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
+  const onSubmit = async (data: FormValues) => {
     setError("");
 
     try {
-      // First fetch tweet data
       const tweetResponse = await fetch("/api/tweet/analyze", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          url,
+          url: data.tweetUrl,
           taskData: task,
           publicKey: publicKey?.toBase58(),
         }),
@@ -46,47 +63,35 @@ export default function TwitterSubmissionForm({ task }: Props) {
       const res = await tweetResponse.json();
       if (!tweetResponse.ok) throw new Error(res.error);
 
-      // Then send for review
-      //   const reviewResponse = await fetch("/api/tweet/review", {
-      //     method: "POST",
-      //     headers: { "Content-Type": "application/json" },
-      //     body: JSON.stringify({
-      //       data: tweetData.data,
-      //       taskId: task._id,
-      //       taskData: task,
-      //     }),
-      //   });
-
-      //   const reviewData = await reviewResponse.json();
-      //   if (!reviewResponse.ok) throw new Error(reviewData.error);
       setResult(res.result);
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "An unknown error occurred"
       );
-    } finally {
-      setLoading(false);
     }
   };
 
   return (
     <Card className="max-w-2xl mx-auto p-6 space-y-6 dark:bg-gray-800 dark:border-gray-700">
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div className="space-y-2">
           <label className="text-sm font-medium dark:text-gray-200">
             Submit your Tweet URL
           </label>
           <Input
+            {...register("tweetUrl")}
             type="url"
-            value={url}
-            onChange={(e) => setUrl(e.target.value)}
-            placeholder="https://twitter.com/user/status/123..."
+            placeholder="https://x.com/user/status/123..."
             className="w-full dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 dark:placeholder-gray-400"
-            required
           />
+          {errors.tweetUrl && (
+            <p className="text-sm text-red-500 dark:text-red-400">
+              {errors.tweetUrl.message}
+            </p>
+          )}
         </div>
-        <Button type="submit" disabled={loading} className="w-full">
-          {loading ? (
+        <Button type="submit" disabled={isSubmitting} className="w-full">
+          {isSubmitting ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               Evaluating...

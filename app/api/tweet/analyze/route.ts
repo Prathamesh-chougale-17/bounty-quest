@@ -103,7 +103,7 @@ export async function POST(request: Request) {
 
     if (tweetData.data.author_id !== user.authorId) {
       return NextResponse.json(
-        { error: "Invalid Twitter URL" },
+        { error: "Please submit your own tweet URL" },
         { status: 400 }
       );
     }
