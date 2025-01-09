@@ -2,8 +2,8 @@ export interface Challenge {
   id: string;
   title: string;
   description: string;
-  category: 'meme' | 'educational' | 'development';
-  difficulty: 'beginner' | 'intermediate' | 'advanced';
+  category: "meme" | "educational" | "development";
+  difficulty: "beginner" | "intermediate" | "advanced";
   rewards: {
     usdcAmount: number;
     nftReward?: string;
@@ -13,7 +13,7 @@ export interface Challenge {
   creator: string;
   participants: string[];
   submissions: Submission[];
-  status: 'active' | 'completed' | 'expired';
+  status: "active" | "completed" | "expired";
 }
 
 export interface Submission {
@@ -25,15 +25,15 @@ export interface Submission {
     arweaveHash?: string;
   };
   timestamp: Date;
-  status: 'pending' | 'approved' | 'rejected';
+  status: "pending" | "approved" | "rejected";
   aiScore?: number;
   feedback?: string;
 }
 
-export interface Task{
+export interface Task {
   _id: string;
   description: string;
-  category: 'blockchain' | 'memes' | 'nfts';
+  category: "blockchain" | "memes" | "nfts";
   requirements: string[];
   evaluationCriteria: string[];
   startTime: Date;
@@ -41,6 +41,7 @@ export interface Task{
   isActive: boolean;
   winners: string[];
   title: string;
+  isWinnerDeclared: boolean;
   rewards: {
     usdcAmount: number;
     nftReward?: string;
