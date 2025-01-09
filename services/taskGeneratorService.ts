@@ -2,6 +2,7 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import clientPromise from "../lib/clientpromise";
 import { ObjectId } from "mongodb";
+import TwitterApi from "twitter-api-v2";
 
 export interface GeneratedTask {
   description: string;
@@ -9,6 +10,13 @@ export interface GeneratedTask {
   requirements: string[];
   evaluationCriteria: string[];
 }
+
+const twitterClient = new TwitterApi({
+  appKey: process.env.TWITTER_API_KEY!,
+  appSecret: process.env.TWITTER_API_SECRET!,
+  accessToken: process.env.TWITTER_ACCESS_TOKEN!,
+  accessSecret: process.env.TWITTER_ACCESS_TOKEN_SECRET!,
+});
 
 export class TaskGeneratorService {
   private static async generateTaskWithAI(): Promise<GeneratedTask> {
@@ -41,6 +49,53 @@ export class TaskGeneratorService {
     return JSON.parse(response.text());
   }
 
+  private static async GenerateTweetContent(
+    task: GeneratedTask,
+    taskId: string
+  ) {
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+
+    // Helper to escape special characters
+    const escapeSpecialChars = (str: string) =>
+      str.replace(/[\n\r\t]/g, " ").replace(/"/g, '\\"');
+
+    // Sanitize inputs
+    const taskDescription = escapeSpecialChars(task.description);
+    const taskRequirements = task.requirements
+      .map(escapeSpecialChars)
+      .join(", ");
+    const taskCriteria = task.evaluationCriteria
+      .map(escapeSpecialChars)
+      .join(", ");
+
+    // Prompt for AI
+    const prompt = `
+    You are tasked with creating a tweet to promote a specific task on Bounty Quest. 
+    Use the details below to craft a creative, engaging, and persuasive tweet:
+  
+    1. **Task Description**: ${taskDescription}
+    2. **Task Requirements**: ${taskRequirements}
+    3. **Evaluation Criteria**: ${taskCriteria}
+  
+    **Goal**: Encourage users to participate in this task. Include the task link in the tweet:
+    https://solana-ai-steel.vercel.app/tasks/${taskId}
+  
+    **Format Requirements**:
+    - The tweet should have proper formatting with line breaks for readability.
+    - Use emojis to make the tweet engaging.
+    - Include the task link and relevant hashtags like #BountyQuest, #Blockchain, etc.
+    - Keep the tweet within the 280 character limit.
+  
+    Respond with the text of the tweet only. Do not include any additional text, JSON format, or comments.
+    `;
+
+    // Get response
+    const result = await model.generateContent(prompt);
+    const tweetContent = result.response.text().trim();
+    return tweetContent;
+  }
+
   public static async createNewTask(
     durationHours: number = 4
   ): Promise<string> {
@@ -63,7 +118,7 @@ export class TaskGeneratorService {
       isWinnerDeclared: false,
       _id: new ObjectId(),
     });
-
+    // await this.PostTweetofTask(task, result.insertedId.toString());
     return result.insertedId.toString();
   }
 
@@ -73,6 +128,18 @@ export class TaskGeneratorService {
     // if task has ended, set isActive to false
     await this.checkTaskStatus();
     return db.collection("tasks").find({ isActive: true }).toArray();
+  }
+
+  public static async PostTweetofTask(task: GeneratedTask, taskId: string) {
+    try {
+      const tweetContent = await this.GenerateTweetContent(task, taskId);
+      const tweet = await twitterClient.v1.tweet("statuses/update", {
+        status: tweetContent,
+      });
+      console.log("Tweet posted:", tweet);
+    } catch (error) {
+      console.error("Error posting tweet:", error);
+    }
   }
 
   public static async getActiveTaskById(taskId: string) {
