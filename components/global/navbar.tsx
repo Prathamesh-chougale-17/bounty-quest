@@ -25,7 +25,12 @@ export function Navbar() {
           {/* Desktop Logo */}
           <div className="hidden md:block">
             <Link href="/" className="font-bold text-xl">
-              <Image src={"/solana-logo.png"} width={40} height={40} alt="Logo" />
+              <Image
+                src={"/solana-logo.png"}
+                width={40}
+                height={40}
+                alt="Logo"
+              />
             </Link>
           </div>
           {/* Mobile Menu Button */}
@@ -68,8 +73,8 @@ export function Navbar() {
               {route.label}
             </Link>
           ))}
-          <WalletButton />
           <ModeToggle />
+          <WalletButton />
         </div>
 
         {/* Mobile Actions */}

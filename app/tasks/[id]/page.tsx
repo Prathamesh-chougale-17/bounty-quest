@@ -1,5 +1,4 @@
-"use client";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import {
   Card,
   CardContent,
@@ -8,84 +7,63 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Award, Clock, ArrowLeft, Loader2 } from "lucide-react";
+import { Award, Clock, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { Task } from "@/types/challenge";
-import TwitterSubmissionForm from "@/components/TwitterSubmissionForm";
+import dynamic from "next/dynamic";
 
-const TaskById = ({ params }: { params: { id: string } }) => {
-  const [task, setTask] = useState<Task | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [timeLeft, setTimeLeft] = useState<{
-    hours: number;
-    minutes: number;
-    seconds: number;
-  } | null>(null);
+// Import client components dynamically
+const TaskSubmissionSection = dynamic(
+  () => import("@/components/TaskSubmissionSection"),
+  { ssr: false }
+);
 
-  useEffect(() => {
-    const fetchTask = async () => {
-      try {
-        const response = await fetch(`/api/tasks/active/${params.id}`);
-        if (!response.ok) throw new Error("Task not found");
-        const data = await response.json();
-        console.log(data);
-        setTask(data.task);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to fetch task");
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchTask();
-  }, [params.id]);
+const Timer = dynamic(() => import("@/components/Timer"), { ssr: false });
 
-  useEffect(() => {
-    if (!task) return;
+async function getTask(id: string): Promise<Task> {
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/api/tasks/active/${id}`,
+    {
+      next: { revalidate: 60 }, // Revalidate every minute
+    }
+  );
 
-    const timer = setInterval(() => {
-      const endTime = new Date(task.endTime).getTime();
-      const now = new Date().getTime();
-      const timeLeft = endTime - now;
+  if (!response.ok) throw new Error("Task not found");
+  const data = await response.json();
+  return data.task;
+}
 
-      setTimeLeft({
-        hours: Math.floor(
-          (timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
-        ),
-        minutes: Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60)),
-        seconds: Math.floor((timeLeft % (1000 * 60)) / 1000),
-      });
-    }, 1000);
+export default async function TaskById({ params }: { params: { id: string } }) {
+  const task = await getTask(params.id);
 
-    return () => clearInterval(timer);
-  }, [task]);
-
-  if (loading) {
+  if (!task) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800">
-        <Loader2 className="h-12 w-12 animate-spin text-purple-600" />
-      </div>
-    );
-  }
-
-  if (error || !task) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800 p-6">
-        <Card className="max-w-4xl mx-auto mt-8 border-red-200 shadow-lg">
-          <CardContent className="p-8">
-            <div className="text-center space-y-4">
-              <p className="text-red-500 text-lg font-medium">
-                {error || "Task not found"}
-              </p>
-              <Link href="/">
-                <Button variant="outline" className="hover:bg-red-50">
-                  <ArrowLeft className="mr-2 h-4 w-4" />
-                  Back to Dashboard
-                </Button>
-              </Link>
-            </div>
-          </CardContent>
-        </Card>
+      <div className="min-h-screen flex items-center justify-center bg-background relative overflow-hidden">
+        <div className="absolute inset-0 bg-grid-small-black/[0.2] dark:bg-grid-small-white/[0.2]" />
+        <div className="absolute inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm" />
+        <div className="relative space-y-8 text-center px-4">
+          <div className="space-y-2">
+            <p className="text-9xl mb-4 select-none">🥺</p>
+            <h1 className="text-8xl font-bold bg-gradient-to-r from-primary via-purple-500 to-primary/60 bg-clip-text text-transparent animate-gradient">
+              404
+            </h1>
+            <h2 className="text-2xl font-semibold tracking-tight mt-4">
+              Oops! Task Not Found
+            </h2>
+          </div>
+          <p className="text-muted-foreground text-lg max-w-[460px] mx-auto">
+            We couldn&apos;t find the task you were looking for. Perhaps it was
+            removed or the URL is incorrect?
+          </p>
+          <div className="flex items-center justify-center gap-4">
+            <Button asChild variant="default" size="lg">
+              <Link href="/">Go Home</Link>
+            </Button>
+            <Button asChild variant="outline" size="lg">
+              <Link href="/tasks">View All Tasks</Link>
+            </Button>
+          </div>
+        </div>
       </div>
     );
   }
@@ -127,9 +105,11 @@ const TaskById = ({ params }: { params: { id: string } }) => {
                 <div className="flex items-center space-x-3 bg-blue-50 dark:bg-blue-900/30 p-3 rounded-lg">
                   <Clock className="h-6 w-6 text-blue-600 dark:text-blue-400" />
                   <span className="font-semibold text-xl text-blue-700 dark:text-blue-300">
-                    {timeLeft
-                      ? `${timeLeft.hours}h ${timeLeft.minutes}m ${timeLeft.seconds}s`
-                      : "Calculating..."}
+                    {new Date(task.endTime) > new Date() ? (
+                      <Timer endtime={task.endTime} />
+                    ) : (
+                      "Task Ended"
+                    )}
                   </span>
                 </div>
               </div>
@@ -154,18 +134,11 @@ const TaskById = ({ params }: { params: { id: string } }) => {
               </div>
             </CardContent>
           </Card>
-
           <div className="space-y-6">
-            <Card className="border border-purple-100 dark:border-purple-900 shadow-xl bg-white/80 dark:bg-gray-800/90">
-              <CardContent className="p-8">
-                <TwitterSubmissionForm task={task} />
-              </CardContent>
-            </Card>
+            <TaskSubmissionSection task={task} />
           </div>
         </div>
       </div>
     </div>
   );
-};
-
-export default TaskById;
+}
