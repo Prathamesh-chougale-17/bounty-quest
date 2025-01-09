@@ -60,6 +60,7 @@ export class TaskGeneratorService {
       endTime,
       isActive: true,
       winners: [],
+      isWinnerDeclared: false,
       _id: new ObjectId(),
     });
 
