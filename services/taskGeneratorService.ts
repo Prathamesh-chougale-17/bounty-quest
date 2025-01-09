@@ -170,15 +170,40 @@ export class TaskGeneratorService {
     return db.collection("tasks").find({ isActive: false }).toArray();
   }
 
-  public static async setTaskWinner(taskId: string, winnerId: string) {
+  public static async setTaskWinner() {
+    const winners: string[] = [];
     const client = await clientPromise;
     const db = client.db("tweetcontest");
-    return db
-      .collection("tasks")
-      .updateOne(
-        { _id: new ObjectId(taskId) },
-        { $set: { winners: winnerId } }
+    const tasks = db.collection("tasks");
+    const submission = db.collection("submissions");
+    // check if the task is already evaluated
+    const completedTask = await tasks.find({ isActive: false }).toArray();
+    // After task is inactive then evaluate the task as submission collection have the task id and submission score. update the top 3 winners in the task collection winner field array
+    const taskIds = completedTask.map((task) => task._id);
+
+    for (const taskId of taskIds) {
+      const submissions = await submission
+        .find({ taskId: taskId.toString() })
+        .sort({ "scores.overall": -1 })
+        .limit(3)
+        .toArray();
+      const winners = submissions.map((submission) => submission.publicKey);
+      const updatedWinner = await tasks.updateOne(
+        {
+          _id: taskId,
+        },
+        { $set: { winners } }
       );
+
+      if (updatedWinner.modifiedCount > 0) {
+        await tasks.updateOne(
+          { _id: taskId },
+          { $set: { isWinnerDeclared: true } }
+        );
+        winners.push(submissions.map((submission) => submission.publicKey));
+      }
+    }
+    return winners;
   }
 
   // write a method to set the task as inactive if the end time has passed
