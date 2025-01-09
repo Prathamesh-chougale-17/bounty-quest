@@ -1,0 +1,126 @@
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  viewBox="0 0 600 400"
+  aria-hidden="true"
+>
+  <!-- Background -->
+  <rect width="100%" height="100%" fill="#f3f4f6" />
+
+  <!-- AI Brain -->
+  <g>
+    <circle cx="200" cy="150" r="50" fill="#6b7280" />
+    <path
+      d="M180,150 Q160,130 140,150 Q160,170 180,150"
+      fill="none"
+      stroke="#4b5563"
+      stroke-width="2"
+    />
+    <path
+      d="M220,150 Q240,130 260,150 Q240,170 220,150"
+      fill="none"
+      stroke="#4b5563"
+      stroke-width="2"
+    />
+    <path
+      d="M150,125 Q125,100 100,125"
+      fill="none"
+      stroke="#4b5563"
+      stroke-width="2"
+    />
+    <path
+      d="M250,125 Q275,100 300,125"
+      fill="none"
+      stroke="#4b5563"
+      stroke-width="2"
+    />
+  </g>
+
+  <!-- Blockchain Symbol -->
+  <rect
+    x="370"
+    y="125"
+    width="80"
+    height="80"
+    rx="10"
+    fill="#4b5563"
+  />
+  <rect
+    x="390"
+    y="145"
+    width="40"
+    height="40"
+    rx="5"
+    fill="#f9fafb"
+  />
+  <line
+    x1="370"
+    y1="125"
+    x2="450"
+    y2="205"
+    stroke="#f9fafb"
+    stroke-width="4"
+  />
+  <line
+    x1="370"
+    y1="205"
+    x2="450"
+    y2="125"
+    stroke="#f9fafb"
+    stroke-width="4"
+  />
+
+  <!-- Task Creation -->
+  <rect
+    x="100"
+    y="200"
+    width="120"
+    height="40"
+    rx="10"
+    fill="#3b82f6"
+  />
+  <text
+    x="160"
+    y="225"
+    text-anchor="middle"
+    font-family="Arial, sans-serif"
+    font-size="16px"
+    fill="white"
+  >
+    Create Task
+  </text>
+
+  <!-- Reward -->
+  <circle cx="500" cy="230" r="35" fill="#9333ea" />
+  <text
+    x="500"
+    y="230"
+    text-anchor="middle"
+    font-family="Arial, sans-serif"
+    font-size="18px"
+    font-weight="bold"
+    fill="white"
+    dy="6"
+  >
+    🎁
+  </text>
+
+  <!-- Arrows Connecting -->
+  <line
+    x1="220"
+    y1="180"
+    x2="370"
+    y2="170"
+    stroke="#3b82f6"
+    stroke-width="3"
+    stroke-dasharray="5,5"
+  />
+  <line
+    x1="370"
+    y1="170"
+    x2="500"
+    y2="200"
+    stroke="#9333ea"
+    stroke-width="3"
+    stroke-dasharray="5,5"
+  />
+</svg>

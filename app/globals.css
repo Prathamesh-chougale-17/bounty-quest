@@ -86,3 +86,40 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+@keyframes gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.animate-gradient {
+  animation: gradient 6s ease infinite;
+  background-size: 200% 200%;
+}
+
+.bg-grid-small-black {
+  background-size: 40px 40px;
+  background-image: linear-gradient(
+      to right,
+      rgb(0 0 0 / 0.1) 1px,
+      transparent 1px
+    ),
+    linear-gradient(to bottom, rgb(0 0 0 / 0.1) 1px, transparent 1px);
+}
+
+.bg-grid-small-white {
+  background-size: 40px 40px;
+  background-image: linear-gradient(
+      to right,
+      rgb(255 255 255 / 0.1) 1px,
+      transparent 1px
+    ),
+    linear-gradient(to bottom, rgb(255 255 255 / 0.1) 1px, transparent 1px);
+}
