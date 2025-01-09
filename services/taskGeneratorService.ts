@@ -176,8 +176,10 @@ export class TaskGeneratorService {
     const db = client.db("tweetcontest");
     const tasks = db.collection("tasks");
     const submission = db.collection("submissions");
-    // check if the task is already evaluated
-    const completedTask = await tasks.find({ isActive: false }).toArray();
+    // check if the task isActive is false and isWinnerDeclared is false
+    const completedTask = await tasks
+      .find({ isActive: false, isWinnerDeclared: false })
+      .toArray();
     // After task is inactive then evaluate the task as submission collection have the task id and submission score. update the top 3 winners in the task collection winner field array
     const taskIds = completedTask.map((task) => task._id);
 
