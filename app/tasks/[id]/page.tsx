@@ -11,6 +11,7 @@ import { Award, Clock, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { Task } from "@/types/challenge";
 import dynamic from "next/dynamic";
+import { notFound } from "next/navigation";
 
 // Import client components dynamically
 const TaskSubmissionSection = dynamic(
@@ -37,23 +38,7 @@ export default async function TaskById({ params }: { params: { id: string } }) {
   const task = await getTask(params.id);
 
   if (!task) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800 p-6">
-        <Card className="max-w-4xl mx-auto mt-8 border-red-200 shadow-lg">
-          <CardContent className="p-8">
-            <div className="text-center space-y-4">
-              <p className="text-red-500 text-lg font-medium">Task not found</p>
-              <Link href="/">
-                <Button variant="outline" className="hover:bg-red-50">
-                  <ArrowLeft className="mr-2 h-4 w-4" />
-                  Back to Dashboard
-                </Button>
-              </Link>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    );
+    return notFound();
   }
 
   return (
