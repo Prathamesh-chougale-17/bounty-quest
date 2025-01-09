@@ -14,7 +14,7 @@ const API_KEY = process.env.AUTHENTICATION_TOKEN; // Add this to your .env file
  * - 200: Winners updated successfully
  * - 500: Failed to update winners
  */
-export async function PUT() {
+export async function PUT(request: Request) {
   try {
     // const client = await clientPromise;
     // const db = client.db("tweetcontest");
@@ -35,7 +35,8 @@ export async function PUT() {
     //     { _id: taskId },
     //     { $set: { winners } }
     //   );
-    if (API_KEY !== `Bearer ${API_KEY}`) {
+    const apiKey = request.headers.get("Authorization");
+    if (apiKey !== `Bearer ${API_KEY}`) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
