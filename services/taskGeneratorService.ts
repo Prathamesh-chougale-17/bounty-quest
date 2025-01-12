@@ -96,9 +96,7 @@ export class TaskGeneratorService {
     return tweetContent;
   }
 
-  public static async createNewTask(
-    durationHours: number = 4
-  ): Promise<string> {
+  public static async createNewTask(durationHours: number = 4) {
     const task = await this.generateTaskWithAI();
 
     const client = await clientPromise;
@@ -118,8 +116,11 @@ export class TaskGeneratorService {
       isWinnerDeclared: false,
       _id: new ObjectId(),
     });
-    // await this.PostTweetofTask(task, result.insertedId.toString());
-    return result.insertedId.toString();
+    const tweet = await this.PostTweetofTask(
+      task,
+      result.insertedId.toString()
+    );
+    return { taskId: result.insertedId.toString(), tweet };
   }
 
   public static async getActiveTask() {
@@ -133,10 +134,9 @@ export class TaskGeneratorService {
   public static async PostTweetofTask(task: GeneratedTask, taskId: string) {
     try {
       const tweetContent = await this.GenerateTweetContent(task, taskId);
-      const tweet = await twitterClient.v1.tweet("statuses/update", {
-        status: tweetContent,
-      });
-      console.log("Tweet posted:", tweet);
+
+      const tweet = await twitterClient.readWrite.v2.tweet(tweetContent);
+      return tweet;
     } catch (error) {
       console.error("Error posting tweet:", error);
     }
