@@ -182,6 +182,7 @@ export class TaskGeneratorService {
       .toArray();
     // After task is inactive then evaluate the task as submission collection have the task id and submission score. update the top 3 winners in the task collection winner field array
     const taskIds = completedTask.map((task) => task._id);
+    console.log("taskIds", taskIds);
 
     for (const taskId of taskIds) {
       const submissions = await submission
