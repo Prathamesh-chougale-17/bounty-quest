@@ -171,7 +171,7 @@ export class TaskGeneratorService {
   }
 
   public static async setTaskWinner() {
-    const winners: string[] = [];
+    let updateCount = 0;
     const client = await clientPromise;
     const db = client.db("tweetcontest");
     const tasks = db.collection("tasks");
@@ -195,7 +195,7 @@ export class TaskGeneratorService {
         .limit(3)
         .toArray();
       const winners = submissions.map((submission) => submission.publicKey);
-      await tasks.updateOne(
+      const updatedWinner = await tasks.updateOne(
         { _id: taskId },
         {
           $set: {
@@ -204,9 +204,11 @@ export class TaskGeneratorService {
           },
         }
       );
-      winners.push(submissions.map((submission) => submission.publicKey));
+      if (updatedWinner) {
+        updateCount++;
+      }
     }
-    return winners;
+    return updateCount;
   }
 
   // write a method to set the task as inactive if the end time has passed
