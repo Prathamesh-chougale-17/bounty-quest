@@ -139,6 +139,7 @@ export class TaskGeneratorService {
       return tweet;
     } catch (error) {
       console.error("Error posting tweet:", error);
+      return error;
     }
   }
 
