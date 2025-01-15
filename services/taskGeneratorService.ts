@@ -138,7 +138,6 @@ export class TaskGeneratorService {
       const tweet = await twitterClient.readWrite.v2.tweet(tweetContent);
       return tweet;
     } catch (error) {
-      console.error("Error posting tweet:", error);
       return error;
     }
   }
