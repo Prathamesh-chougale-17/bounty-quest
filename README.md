@@ -1,36 +1,114 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Bounty-Quest
 
-## Getting Started
+Bounty-Quest is a decentralized task-based rewards system that generates daily tasks using the Gemini API. Participants complete tasks by posting on the blockchain via Twitter, providing a link to their tweet for AI-powered evaluation. The top three winners are announced based on AI scoring, and authentication is managed through Solana. Future updates will include smart contract integration to distribute rewards in DevSOL.
 
-First, run the development server:
+## Features
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- **Daily Task Generation**: Tasks are generated using the Gemini API.
+- **Blockchain Integration**: Tasks are posted on Twitter with blockchain validation.
+- **AI-based Scoring**: AI evaluates tweets and assigns scores based on relevance and quality.
+- **Automated Winner Selection**: The top 3 users with the highest scores are announced.
+- **Solana Authentication**: Secure login and verification using Solana wallets.
+- **Future Smart Contract Integration**: DevSOL rewards will be distributed through Solana smart contracts.
+
+## Tech Stack
+
+- **Frontend**: Next.js, Tailwind CSS, TypeScript
+- **Backend**: API Routes, Solana Authentication
+- **AI Scoring**: Gemini API
+- **Blockchain**: Solana, Twitter (for task submission)
+- **Storage & Services**: MongoDB (for task & user management)
+
+## Installation
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/prathamesh-chougale-17/bounty-quest.git
+   cd bounty-quest
+   ```
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+3. Set up environment variables:
+   - Copy `.env.example` to `.env.local` and update the required credentials.
+4. Run the development server:
+   ```bash
+   npm run dev
+   ```
+
+## Project Structure
+
+```
+prathamesh-chougale-17-bounty-quest/
+├── app/                # Next.js app folder
+├── components/         # Reusable components
+├── hooks/             # Custom React hooks
+├── lib/               # Utility functions and API adapters
+├── services/          # Business logic services (scoring, task generation)
+├── types/             # TypeScript types
+├── utils/             # Utility scripts
+├── public/            # Static assets
+├── .github/           # CI/CD workflows
+└── system-design.drawio  # System architecture
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## API Endpoints
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Authentication (Solana)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+POST /api/auth
+```
 
-## Learn More
+Handles user authentication via Solana wallets.
 
-To learn more about Next.js, take a look at the following resources:
+### Task Management
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```
+POST /api/tasks/create
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Generates a new task using Gemini API.
 
-## Deploy on Vercel
+```
+GET /api/tasks/active
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Retrieves the active task of the day.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```
+POST /api/tasks/submit
+```
+
+User submits their Twitter post link for scoring.
+
+### AI Evaluation
+
+```
+POST /api/tweet/analyze
+```
+
+Analyzes the tweet and assigns a score.
+
+```
+POST /api/tasks/evaluate
+```
+
+Evaluates all submissions and selects top 3 winners.
+
+## Roadmap
+
+- [x] Task generation using Gemini API
+- [x] Solana authentication
+- [x] AI-based scoring
+- [x] Winner selection automation
+- [ ] Smart contract integration for reward distribution
+
+## Contributing
+
+Feel free to submit issues, pull requests, or suggestions to improve Bounty-Quest!
+
+## License
+
+MIT License
