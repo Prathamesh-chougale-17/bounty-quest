@@ -38,7 +38,6 @@ export class TaskGeneratorService {
           "usdcAmount": "any number from 1 to 1000",
           "nftReward": "optional NFT reward"
         }
-
       }
 
       Make the task fun and engaging while maintaining relevance to crypto/web3 culture.
@@ -54,7 +53,9 @@ export class TaskGeneratorService {
     taskId: string
   ) {
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+    const model = genAI.getGenerativeModel({
+      model: "gemini-2.0-pro-exp-02-05",
+    });
 
     // Helper to escape special characters
     const escapeSpecialChars = (str: string) =>
